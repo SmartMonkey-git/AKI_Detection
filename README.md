@@ -9,5 +9,3 @@ TODO: Add Test, Add ReadMe.
 - [ ] Implemented
 
 Paper: [Mark E. Thomas 2017](https://www.sciencedirect.com/science/article/pii/S0085253815300351)
-
-https://www.sciencedirect.com/science/article/pii/S0085253815300351
