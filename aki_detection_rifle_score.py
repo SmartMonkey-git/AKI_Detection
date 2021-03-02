@@ -4,6 +4,7 @@
 # Permanent Graft loss; When the values does not return to the baseline after 90 days prior the aki incident. We choose 90 instead of 30 days, because the data tends to be undersampled  -> Level 4
 # RIFLE -> https://litfl.com/rifle-criteria-and-akin-classification/
 import pandas as pd
+_AKI_LEVEL_DICT_RIFLE = {0:"No Risk", 1:"Risk", 2:"Injury", 3:"Failure", 4:"Loss of kidney function", 5:"End-stage kidney disease"}
 
 def aki_level_seven_days(cr_baseline:float, cr_value:float, time_delta_in_days:int) -> int:
     """
@@ -45,7 +46,11 @@ def aki_level_two_days(current_cr_value:float, past_cr_value:float, time_delta:p
 
     return aki_level
 
-def check_for_permanent_graft_loss(df_slice:pd.DataFrame, current_date:pd.Timestamp, baseline:float, time_span_in_days:int = 30, percentage_treshold:float = 0.8) -> bool:
+def check_for_permanent_graft_loss(df_slice:pd.DataFrame, 
+                                current_date:pd.Timestamp,
+                                baseline:float, 
+                                time_span_in_days:int = 30, 
+                                percentage_treshold:float = 0.8) -> bool:
     """ 
     Checks if the found AKI is actually a permanent loss of graft.
 
@@ -90,22 +95,54 @@ def get_compliance_cr_value(cr_baseline:float, cr_value:float) -> str:
     elif cr_baseline * 1.5 < cr_value:
         return "Abnormal+"
 
-def detect_akis(cr_data:pd.DataFrame, cr_baselines:pd.DataFrame, detect_permanent_graft_loss:bool = True, permanent_graft_loss_time_threshold:int = 30) -> pd.DataFrame:
+def clean_duplicate_akis(to_clean:pd.dataFrame) -> pd.DataFrame:
+    to_clean = to_clean.drop(columns = ["Index"])
+
+    for index, value in to_clean.iterrows():
+
+        date = value["Date"]
+        relevant_date = to_clean[(to_clean["Date"] <= date) & (to_clean["Date"] >= (date - pd.Timedelta(7, unit='d')))]
+        date_to_keep = relevant_date[relevant_date["Cr_Value"] == relevant_date["Cr_Value"].max()]["Date"].values[0]
+        dates = relevant_date[relevant_date["Date"] != date_to_keep]["Date"].values
+
+        to_clean.loc[to_clean["Date"].isin(dates), "AKI_Level"] = 0
+
+    return to_clean
+
+def rename_aki_levels_to_rifle(aki_level:int)->str:
+    """
+    Takes an integer from 0 to 5 and converts it to the corrisponding Aki string
+
+    Args:
+        aki_level:int -> Integer that reflects the level of the aki
+
+    Returns: A string that describs the level of the aki
+    """
+
+    if aki_level > 5:
+        return aki_level
+    
+    return _AKI_LEVEL_DICT_RIFLE[aki_level]
+    
+
+def detect_akis(cr_data:pd.DataFrame, 
+                cr_baselines:pd.DataFrame, 
+                detect_permanent_graft_loss:bool = True, 
+                permanent_graft_loss_time_threshold:int = 30,
+                clean_duplicate_akis:bool = True) -> pd.DataFrame:
     """
     Detects AKI's based on on the RIFLE score. Will detect AKI Level 1,2 and 3, plus a permanent Graft loss
 
     Args: 
-
         cr_data:pd.DataFrame -> A DateFrame consisting of the columns PatientID, Cr_Value and Date
         cr_baselines:pd.DataFrame -> A DataFrame consisting of the columns PatientID and Create_Baseline
         detect_permanent_graft_loss:bool -> If true the algo will check for permanent graft loss, if false found AKI's will not be checkt for graft losses
         permanent_graft_loss_time_threshold:int -> The Threshold of time in which the algo considers an AKI to be a PGL after the AKI incident. Per definition this is 30 day, but if you data is undersampled it can help to choose a higher value. 
-
+        clean_duplicate_akis:bool -> Within 7 days the Cr value can actally rise to fast, so that insead of one the Algo might end up with multiple akis where only one should be. Setting this true will clean up the found akis a bit.
+        
     Returns: A Dataframe with the AKI occurences
     """
     output = pd.DataFrame()
-    count_of_iterations = cr_data["PatientID"].unique()
-    current_iteration = 0
 
     columns = ["PatientID","Date", "Value", "AKI_Level", "Compliance"]
 
@@ -181,21 +218,20 @@ def detect_akis(cr_data:pd.DataFrame, cr_baselines:pd.DataFrame, detect_permanen
                      detect_permanent_graft_loss:
                         data["AKI_Level"] = 4
 
+                    if data["AKI_Level"] > 0 and \
+                        check_for_permanent_graft_loss(cr_df_slice.iloc[index: count_of_cr_values], current_date, baseline, time_span_in_days = 90) and  \
+                        detect_permanent_graft_loss:
+                        data["AKI_Level"] = 5
+
             temp_data.append(data)
 
         ## Clean the data for each patient.
         ## Look at a time window of 7 days for the whole time series and keeps the highes value
-        to_clean = pd.DataFrame(temp_data)
-        to_clean = to_clean.drop(columns = ["Index"])
+        if clean_duplicate_akis == True:
+            output = output.append(clean_duplicate_akis(temp_data))
+        else:
+            output = output.append(temp_data)
 
-        for index, value in to_clean.iterrows():
-
-            date = value["Date"]
-            relevant_date = to_clean[(to_clean["Date"] <= date) & (to_clean["Date"] >= (date - pd.Timedelta(7, unit='d')))]
-            date_to_keep = relevant_date[relevant_date["Cr_Value"] == relevant_date["Cr_Value"].max()]["Date"].values[0]
-            dates = relevant_date[relevant_date["Date"] != date_to_keep]["Date"].values
-
-            to_clean.loc[to_clean["Date"].isin(dates), "AKI_Level"] = 0
-        output = output.append(to_clean)
+    output = output["AKI_Level"].apply(lambda aki: rename_aki_levels_to_rifle(aki))
 
     return output
