@@ -1,7 +1,9 @@
 ## AKI_Detection
 
-TODO: Add Test, Add ReadMe.
-
+TODO: 
+- [ ] Add Tests
+- [ ] Add ReadMe
+- [ ] Make cleaning of found AKI's optional
 
 ## The definition of acute kidney injury and its use in practice
 
