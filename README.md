@@ -8,6 +8,7 @@ TODO:
 - [ ] Add Tests
 - [ ] Add ReadMe
 - [x] Make cleaning of found AKI's optional
+- [x] Add RIFLE difinition of AKI
 - [ ] Add AKIN definition of AKI
 - [ ] Add pRIFLE definition of AKI
 - [ ] Add KDIGO definition of AKI
