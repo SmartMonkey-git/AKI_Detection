@@ -13,7 +13,8 @@ TODO:
 - [ ] Add KDIGO definition of AKI
 - [ ] Add urin output to all definitions
 - [ ] Add baseline creatinine according to MDRD formular
-- [ ] baseline creatinine = 0.74 − 0.2 (if female) + 0.08 (if black) + 0.003 × age (in years)
+- [x] Add baseline creatinine suggests by [Jakub Závada2010](https://academic.oup.com/ndt/article/25/12/3911/1863037)
+- [x] Add CKD-EPI glomerular filtration rate (GRF) [Andrew S. Levey2009](https://www.acpjournals.org/doi/abs/10.7326/0003-4819-150-9-200905050-00006?journalCode=aim)
 
 # On AKI definitions
 
@@ -40,9 +41,16 @@ Paper: [António2013](https://watermark.silverchair.com/sfs160.pdf?token=AQECAHi
 
 ## A comparison of three methods to estimate baseline creatinine for RIFLE classification
 
-- [ ] Read
+- [x] Read
 
 Paper: [Jakub Závada2010](https://academic.oup.com/ndt/article/25/12/3911/1863037)
+
+
+## Comparison of Three Methods Estimating Baseline Creatinine For Acute Kidney Injury in Hospitalized Patients: a Multicentre Survey in Third-Level Urban Hospitals of China
+
+- [ ] Read
+
+Paper: [Lang X2018](https://www.karger.com/Article/FullText/487366)
 
 ## The calculation of baseline serum creatinine overestimates the diagnosis of acute kidney injury in patients undergoing cardiac surgery
 
