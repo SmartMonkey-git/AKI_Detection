@@ -13,7 +13,7 @@ TODO:
 - [ ] Add pRIFLE definition of AKI
 - [ ] Add KDIGO definition of AKI
 - [ ] Add urin output to all definitions
-- [ ] Add baseline creatinine according to MDRD formular
+- [x] Add baseline creatinine according to MDRD formular
 - [x] Add baseline creatinine suggests by [Jakub Závada2010](https://academic.oup.com/ndt/article/25/12/3911/1863037)
 - [x] Add CKD-EPI glomerular filtration rate (GRF) [Andrew S. Levey2009](https://www.acpjournals.org/doi/abs/10.7326/0003-4819-150-9-200905050-00006?journalCode=aim)
 
