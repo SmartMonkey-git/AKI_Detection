@@ -144,7 +144,7 @@ def detect_akis(cr_data:pd.DataFrame,
     """
     output = pd.DataFrame()
 
-    columns = ["PatientID","Date", "Value", "AKI_Level", "Compliance"]
+    columns = ["PatientID","Date", "Cr_Value", "AKI_Level", "Compliance"]
 
     for paID in cr_data["PatientID"].unique():
         
@@ -164,7 +164,6 @@ def detect_akis(cr_data:pd.DataFrame,
 
             ## Collect basic data from row
             row = cr_df_slice.iloc[index]
-            data["Index"] = row.index
             data["PatientID"] = paID
             data["AKI_Level"] = 0
             data["Compliance"] = get_compliance_cr_value(baseline, row["Cr_Value"])
