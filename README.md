@@ -10,7 +10,7 @@ If you would like to see the state of the project check out the trello board. ->
 ## Getting started
 
 Most of the definitions of AKI use a basline creatinine value. This value is individual for each patient and can depend on diffent factors. Using the **aki_baseline_calculation.py** you are able to calculate those values. Most of the definitions use age, gender and ethnicity of the patient.
-Using the basline you are able to generate aki incidences for time series data. Import one of the __aki_detection.py__ files and pass the time series plus your your baseline.
+Using the basline you are able to generate aki incidences for time series data. Import one of the __aki_detection.py__ scripts and pass the time series plus your creatinine baseline.
 
 Your input table needs to be a pandas dataframe and might differ a little bit for the different definitions. However for the RIFLE definition it should look like this:
 

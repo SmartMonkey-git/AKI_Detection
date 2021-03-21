@@ -93,7 +93,7 @@ def statistical_creatinine_baseline(cr_data:pd.DataFrame, chunck_penalty:float =
     return create_baseline
 
 
-def get_gender_fixed_baseline_creatinine(gender:str):
+def gender_fixed_baseline_creatinine(gender:str):
     """
     Calculates a gender based Creatinine baseline. Definition by this Paper: https://academic.oup.com/ndt/article/25/12/3911/1863037
 
@@ -102,11 +102,11 @@ def get_gender_fixed_baseline_creatinine(gender:str):
 
     Returns: A Creatinine Baseline value in mg/dl that depends solely on the gender
     """
-
+    
     return _CEATININE_BY_GENER[gender.lower()[0]]
 
 
-def get_revised_baseline_creatinine(age:int, is_female:bool, is_black:bool):
+def revised_baseline_creatinine(age:int, is_female:bool, is_black:bool):
     """
     Calculates a Creatinine baseline base on gender, ethnicity and age. Definition by this Paper: https://academic.oup.com/ndt/article/25/12/3911/1863037
 
@@ -119,22 +119,7 @@ def get_revised_baseline_creatinine(age:int, is_female:bool, is_black:bool):
     """
     return 0.74 - 0.2*int(is_female) + 0.08*int(is_black) + 0.003*age
 
-
-def get_MDRD_baseline_creatinine(age:int, is_female:bool, is_black:bool):
-    """
-    Calculates the creatninine baseline based on the MDRD formular. Found in this Paper: https://academic.oup.com/ndt/article/25/12/3911/1863037
-
-    Args:
-        age:int -> age of the patient in year
-        is_female:bool -> if the patient is femal or not
-        is_black:bool -> if the patient is has black skin color or not
-    
-    Returns: A Creatinine Baseline value in mg/dl
-    """
-    return 75/pow((186 * pow(age, -0.203) * 0.742*int(is_female) * 1.21*int(is_black)), -0.887)
-    
-
-def get_CKD_EPI_glomerular_filtration_rate(age:int, is_female:bool, is_black:bool, min_cr_value:float = 1, max_cr_value:float = 1):
+def CKD_EPI_glomerular_filtration_rate(age:int, is_female:bool, is_black:bool, min_cr_value:float = 1, max_cr_value:float = 1):
     """
     Caluclates the glomerular filtration rate of a patient. Definition by this Paper: https://www.acpjournals.org/doi/abs/10.7326/0003-4819-150-9-200905050-00006?journalCode=aim
 
@@ -147,9 +132,32 @@ def get_CKD_EPI_glomerular_filtration_rate(age:int, is_female:bool, is_black:boo
 
     Returns: The glomerular filtration rate of a patient in mL/s/1.73 m2
     """
-    gender_value = [0.9, 0.7][int(is_female)]
+    gender_weight = [0.9, 0.7][int(is_female)]
     alpha = [-411, -0.329][int(is_female)]
-    ethnicity_value = [144, 166][int(is_black)]
+    ethnicity_weight = [144, 166][int(is_black)]
 
-    grf = ethnicity_value * pow((min_cr_value/gender_value), alpha) * pow((max_cr_value/gender_value), -1.209) * pow(0.993, age) * 1.018*int(is_female) + 1.159*int(is_black)
-    return grf
+    gfr = ethnicity_weight * pow((min_cr_value/gender_weight), alpha) * pow((max_cr_value/gender_weight), -1.209) * pow(0.993, age) * 1.018*int(is_female) + 1.159*int(is_black)
+    return gfr
+
+
+def MDRD_glomerular_filtration_rate(age:int, is_female:bool, is_black:bool):
+    """
+    Calculates the glomerular filtration rate based on the MDRD formular. Found in this Paper: https://academic.oup.com/ndt/article/25/12/3911/1863037
+
+    Args:
+        age:int -> age of the patient in year
+        is_female:bool -> if the patient is femal or not
+        is_black:bool -> if the patient is has black skin color or not
+    
+    Returns: A glomerular filtration rate value in mL/min/1.73 m²
+    """
+    gender_weight = 1
+    ethnicity_weight = 1
+
+    if is_female:
+        gender_weight = 0.742
+    
+    if is_black:
+        ethnicity_weight = 1.21
+
+    return (75/(pow((186 * pow(age, -0.203) * gender_weight * ethnicity_weight), -0.887)))/100
