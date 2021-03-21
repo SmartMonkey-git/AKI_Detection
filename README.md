@@ -1,23 +1,53 @@
 ## Introduction
 
-This Repository is currenlty under development
+**This Repository is currenlty under development**
 
-## AKI_Detection
+This project lets you detect Acute Kidney Injures (AKI's) from time series data. It does not use Machine- or Deep learning, however it implements rules defined by scientific papers to that define an AKI. The used papers can be found at the bottom of the read me. 
 
-TODO: 
-- [ ] Add Tests
-- [ ] Add ReadMe
-- [x] Make cleaning of found AKI's optional
-- [x] Add RIFLE difinition of AKI
-- [ ] Add AKIN definition of AKI
-- [ ] Add pRIFLE definition of AKI
-- [ ] Add KDIGO definition of AKI
-- [ ] Add urin output to all definitions
-- [x] Add baseline creatinine according to MDRD formular
-- [x] Add baseline creatinine suggests by [Jakub Závada2010](https://academic.oup.com/ndt/article/25/12/3911/1863037)
-- [x] Add CKD-EPI glomerular filtration rate (GRF) [Andrew S. Levey2009](https://www.acpjournals.org/doi/abs/10.7326/0003-4819-150-9-200905050-00006?journalCode=aim)
+If you would like to see the state of the project check out the trello board. ->
+[Trello Board](https://trello.com/b/JrzoR8ww)
 
-# On AKI definitions
+## Getting started
+
+Most of the definitions of AKI use a basline creatinine value. This value is individual for each patient and can depend on diffent factors. Using the **aki_baseline_calculation.py** you are able to calculate those values. Most of the definitions use age, gender and ethnicity of the patient.
+Using the basline you are able to generate aki incidences for time series data. Import one of the __aki_detection.py__ files and pass the time series plus your your baseline.
+
+Your input table needs to be a pandas dataframe and might differ a little bit for the different definitions. However for the RIFLE definition it should look like this:
+
+| PatientID        | Cr_Value           | Date  |
+| ------------- |:-------------:| -----:|
+| 1234      | 1.32 | 12.3.2020 |
+| 1234      | 1.01      |   17.3.2020 |
+| 1234 | 1.25      |    02.4.2020 |
+
+You should receive a new dataframe with the AKI levels for every date. 
+
+Example:
+
+
+```python
+from aki_baseline_calculation import get_MDRD_baseline_creatinine as MDRD_Cr_baseline
+from aki_detection_rifle_score import detect_akis
+from aki_visualization import visualize_aki_data
+
+patientID = 1234
+cr_time_series = pd.read_csv("example.csv")
+
+cr_baseline = MDRD_Cr_baseline(age = 42, is_female = True, is_black = True)
+
+cr_baseline_df = pd.DataFrame(data = [{"PatientID": patientID, "Create_Baseline": cr_baseline}])
+
+aki_df = detect_akis(cr_time_series, cr_baseline_df)
+
+visualize_aki_data(aki_df[aki_df["PatientID"] == patientID], cr_baseline)
+```
+
+Executing this code and naming everything right should give you these graphs.
+
+![model1](./ReadMeAssets/example.png)
+
+
+# Further readings on AKI definitions
 
 ## The definition of acute kidney injury and its use in practice
 
